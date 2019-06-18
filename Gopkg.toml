@@ -43,5 +43,4 @@
 
 [metadata.heroku]
   root-package = "github.com/geofence"
-  go-version = "go
-  1.12.5"
+  go-version = "go1.12.5"
