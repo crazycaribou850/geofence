@@ -1,1 +1,1 @@
-web: polygons-mockup
+web: main
