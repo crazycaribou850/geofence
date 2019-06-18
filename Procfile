@@ -1,1 +1,1 @@
-web: bin/polygons-mockup
+web: polygons-mockup
