@@ -1,1 +1,1 @@
-web: bin/geofence
+web: bin/polygons-mockup
