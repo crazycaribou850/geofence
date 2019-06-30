@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/geofence/router"
+	"github.com/geofence/internal/application"
+	"github.com/geofence/internal/configuration"
+	"github.com/pkg/errors"
 	"log"
-	"net/http"
-	"os"
 )
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = ":8080"
-	} else {
-		port = ":" + port
+	appConfig := configuration.Load()
+
+	app, err := application.NewApplication(appConfig)
+	if wErr := errors.Wrapf(err, "failed setting up application"); wErr != nil {
+		log.Panic(wErr)
 	}
-	router.InitRoutes()
-	log.Fatal(http.ListenAndServe(port, nil))
+
+	app.Run()
 }

@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"github.com/geofence/helpers"
-	"github.com/geofence/logic"
+	"github.com/geofence/internal/helpers"
+	"github.com/geofence/internal/logic"
 	"github.com/pquerna/ffjson/ffjson"
 	"io/ioutil"
 	"net/http"
@@ -59,13 +59,13 @@ func PolyHandler(w http.ResponseWriter, r *http.Request) {
 
 	type IncomingPolyMessage struct {
 		Fence *[]logic.Coordinate `json:"fence"`
-		Point   *logic.Coordinate	`json:"point"`
+		Point   *logic.Coordinate `json:"point"`
 	}
 
 	type PolyResponse struct {
 		Fence    *[]logic.Coordinate `json:"fence"`
-		Point    *logic.Coordinate  `json:"point"`
-		Position string             `json:"position"`
+		Point    *logic.Coordinate   `json:"point"`
+		Position string              `json:"position"`
 	}
 
 	body, err := ioutil.ReadAll(r.Body)
