@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"log"
 	"gopkg.in/go-playground/validator.v9"
+	"os"
 )
 
 type App struct {
@@ -20,11 +21,13 @@ type App struct {
 }
 
 func NewApplication(appConfig *configuration.Config) (*App, error) {
-	db, err := db.NewDB(appConfig.DBURL)
+	logger := log.Logger{}
+	logger.SetOutput(os.Stdout)
+	db, err := db.NewDB(appConfig.DBURL, logger)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating postgres client")
 	}
-	logger := log.Logger{}
+
 	polyController := controller.NewPolyController(validator.New(), logger)
 	circleController := controller.NewCircleController(validator.New(), logger)
 	router := mux.NewRouter()
