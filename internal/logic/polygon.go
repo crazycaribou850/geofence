@@ -5,14 +5,9 @@ import (
 	"math"
 )
 
-type Coordinate struct {
-	Lat float64	`json:"lat"`
-	Long float64	`json:"long"`
-}
-
 // A circle with a center and a radius
 type RadialFence struct{
-	Center Coordinate	`json:"center"`
+	Center [2]float64	`json:"center"`
 	Radius float64	`json:"radius"`
 }
 
@@ -28,11 +23,11 @@ func degreesToRadians(d float64) float64 {
 }
 
 // Determine the distance between 2 coordinates on the globe.
-func radialDistance(c1, c2 Coordinate) float64 {
-	lat1 := degreesToRadians(c1.Lat)
-	lon1 := degreesToRadians(c1.Long)
-	lat2 := degreesToRadians(c2.Lat)
-	lon2 := degreesToRadians(c2.Long)
+func radialDistance(c1, c2 [2]float64) float64 {
+	lat1 := degreesToRadians(c1[0])
+	lon1 := degreesToRadians(c1[1])
+	lat2 := degreesToRadians(c2[0])
+	lon2 := degreesToRadians(c2[1])
 
 	diffLat := lat2 - lat1
 	diffLon := lon2 - lon1
@@ -48,7 +43,7 @@ func radialDistance(c1, c2 Coordinate) float64 {
 }
 
 // Determines if a coordinate lies within a RadialFence.
-func InRadius(coordinate Coordinate, fence RadialFence, ) bool{
+func InRadius(coordinate [2]float64, fence RadialFence, ) bool{
 	if radialDistance(fence.Center, coordinate) <= fence.Radius {
 		return true
 	}
@@ -56,20 +51,20 @@ func InRadius(coordinate Coordinate, fence RadialFence, ) bool{
 }
 
 // Creates a line from 2 coordinates.
-func makeLine(c1 Coordinate, c2 Coordinate) [2]Coordinate {
-	return [2]Coordinate{c1, c2}
+func makeLine(c1 , c2 [2]float64) [2][2]float64 {
+	return [2][2]float64{c1, c2}
 }
 
 // Helper function to determine if a point intersects a line.
-func intersectsLine(coordinate Coordinate, line [2]Coordinate) float64 {
+func intersectsLine(coordinate [2]float64, line [2][2]float64) float64 {
 	gradient := gradient(line)
 
 	// Determine the high and low points of the line
 	yHighIndex := 0
-	yHigh := line[0].Long
-	if line[1].Long > yHigh {
+	yHigh := line[0][1]
+	if line[1][1] > yHigh {
 		yHighIndex = 1
-		yHigh = line[1].Long
+		yHigh = line[1][1]
 	}
 
 	// Now we have yHighIndex.
@@ -83,30 +78,30 @@ func intersectsLine(coordinate Coordinate, line [2]Coordinate) float64 {
 		return 0
 	}
 
-	if coordinate.Long > line[yHighIndex].Long || coordinate.Long < line[1-yHighIndex].Long {
+	if coordinate[1] > line[yHighIndex][1] || coordinate[1] < line[1-yHighIndex][1] {
 		return 0
 	}
 
 	//BUG this returns 0.5 for points to the left as well.
-	if coordinate.Long == line[0].Long || coordinate.Long == line[1].Long {
+	if coordinate[1] == line[0][1] || coordinate[1] == line[1][1] {
 		return handleVerticeIntersection(coordinate, line, yHighIndex)
 	}
 
-	if coordinate.Lat <= line[xHighIndex].Lat && coordinate.Lat <= line[1-xHighIndex].Lat {
+	if coordinate[0] <= line[xHighIndex][0] && coordinate[0] <= line[1-xHighIndex][0] {
 		return 1
 	}
 
-	deltaX := coordinate.Lat-line[1-xHighIndex].Lat
-	yLine := line[1-xHighIndex].Long + gradient*deltaX
-	return intersectsLineToRight(yLine, coordinate.Long, gradient)
+	deltaX := coordinate[0]-line[1-xHighIndex][0]
+	yLine := line[1-xHighIndex][1] + gradient*deltaX
+	return intersectsLineToRight(yLine, coordinate[1], gradient)
 }
 
 // Helper function to determine if intersection should count given a point where the ray from a line intersects the tip of a line.
 // Intersection should only count when the line is to the right of the point AND the ray intersects the top of the line.
 // E.g. (5, 5) intersects Line{(10, 5), (15, 3)} and Line{(10, 3), (15, 5)} but not Line{(10,10), (15, 5)}
-func handleVerticeIntersection(coordinate Coordinate, line [2]Coordinate, yHighIndex int) float64 {
-	if coordinate.Long == line[yHighIndex].Long {
-		if coordinate.Lat > line[yHighIndex].Lat {
+func handleVerticeIntersection(coordinate [2]float64, line [2][2]float64, yHighIndex int) float64 {
+	if coordinate[1] == line[yHighIndex][1] {
+		if coordinate[0] > line[yHighIndex][0] {
 			return 0
 		} else {
 			return 1
@@ -138,25 +133,24 @@ func intersectsLineToRight (yLine float64, yPoint float64, gradient float64) flo
 
 // Helper function to generate a list of lines given a list of coordinates that make up a polygon
 // Coordinates must be given in anticlockwise fashion.
-func generateLines(coordinates []Coordinate) [][2]Coordinate {
-	var lines [][2]Coordinate
+func generateLines(coordinates [][2]float64) [][2][2]float64 {
+	var lines [][2][2]float64
 
 	for index, coordinate := range coordinates {
-		newLine := [2]Coordinate{coordinate, coordinates[(index+1)%len(coordinates)]}
+		newLine := [2][2]float64{coordinate, coordinates[(index+1)%len(coordinates)]}
 		lines = append(lines, newLine)
 	}
 	return lines
 }
 
-
 // Helper function to determine the gradient of a line
-func gradient(line [2]Coordinate) float64 {
-	return (line[1].Long-line[0].Long)/(line[1].Lat-line[0].Lat)
+func gradient(line [2][2]float64) float64 {
+	return (line[1][1]-line[0][1])/(line[1][0]-line[0][0])
 }
 
 // Given a point and a list of coordinates that make up a polygon, determine the number of lines that the point (extended) would intersect
 // Helper function for inOrOut
-func countIntersects(point Coordinate, coordinates []Coordinate) float64 {
+func countIntersects(point [2]float64, coordinates [][2]float64) float64 {
 	result := 0.0
 	lines := generateLines(coordinates)
 	for _, line := range lines {
@@ -167,7 +161,7 @@ func countIntersects(point Coordinate, coordinates []Coordinate) float64 {
 
 // Given a point and a list of coordinates that make up a polygon, determine if the point lies inside the polygon.
 // Coordinates must be ordered in anticlockwise fashion.
-func InPoly(point Coordinate, coordinates []Coordinate) bool {
+func InPoly(point [2]float64, coordinates [][2]float64) bool {
 	intersects := int(countIntersects(point, coordinates))
 	if intersects%2 > 0 {
 		return true

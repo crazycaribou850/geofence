@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/geofence/internal/model"
 	"io/ioutil"
 	"net/http"
 
@@ -27,14 +28,14 @@ func NewPolyController(validator *validator.Validate, log log.Logger) *PolyContr
 }
 
 func (c *PolyController) DetermineMembership() func(w http.ResponseWriter, r *http.Request) {
-	type IncomingPolyMessage struct {
-		Fence *[]logic.Coordinate `json:"fence" validate:"required"`
-		Point *logic.Coordinate   `json:"point" validate:"required"`
+	type IncomingMessage struct {
+		Geom *model.PolyGeometry `json:"geom" validate:"required"`
+		Point *[2]float64 `json:"point" validate:"required"`
 	}
 
 	type PolyResponse struct {
-		Fence    *[]logic.Coordinate `json:"fence"`
-		Point    *logic.Coordinate   `json:"point"`
+		Geom    *model.PolyGeometry `json:"geom"`
+		Point    *[2]float64   `json:"point"`
 		Position string              `json:"position"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +48,7 @@ func (c *PolyController) DetermineMembership() func(w http.ResponseWriter, r *ht
 			return
 		}
 
-		var params IncomingPolyMessage
+		var params IncomingMessage
 		err = ffjson.Unmarshal(body, &params)
 		if err != nil {
 			c.Logger.Println("Failed to unmarshal IncomingPolyMessage", err)
@@ -63,16 +64,16 @@ func (c *PolyController) DetermineMembership() func(w http.ResponseWriter, r *ht
 		}
 
 		point := params.Point
-		fence := params.Fence
+		geom := params.Geom
 
-		result := logic.InPoly(*point, *fence)
+		result := logic.InPoly(*point, geom.Coordinates[0])
 		var position string
 		if result {
 			position = "Inside"
 		} else {
 			position = "Outside"
 		}
-		responseBodyInfo := PolyResponse{fence, point, position}
+		responseBodyInfo := PolyResponse{geom, point, position}
 		responseBody, err := ffjson.Marshal(responseBodyInfo)
 		if err != nil {
 			c.Logger.Println("PolyResponse Marshal failed", err)
