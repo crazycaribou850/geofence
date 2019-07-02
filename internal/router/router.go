@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"github.com/gorilla/mux"
 	"github.com/geofence/internal/controller"
+	"github.com/gorilla/mux"
 	"log"
 
 	"github.com/geofence/internal/configuration"

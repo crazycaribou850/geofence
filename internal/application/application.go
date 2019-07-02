@@ -5,12 +5,12 @@ import (
 	"github.com/geofence/internal/configuration"
 	"github.com/geofence/internal/controller"
 	"github.com/geofence/internal/db"
-	"github.com/gorilla/mux"
 	r "github.com/geofence/internal/router"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	"net/http"
-	"log"
 	"gopkg.in/go-playground/validator.v9"
+	"log"
+	"net/http"
 	"os"
 )
 

@@ -27,12 +27,12 @@ func NewCircleController(validator *validator.Validate, log log.Logger) *CircleC
 func (c *CircleController) DetermineMembership() func(w http.ResponseWriter, r *http.Request) {
 	type IncomingCircleMessage struct {
 		Fence *logic.RadialFence `json:"fence" validate:"required"`
-		Point *logic.Coordinate  `json:"point" validate:"required"`
+		Point *[2]float64  `json:"point" validate:"required"`
 	}
 
 	type CircleResponse struct {
 		Fence    *logic.RadialFence `json:"fence"`
-		Point    *logic.Coordinate  `json:"point"`
+		Point    *[2]float64  `json:"point"`
 		Position string             `json:"position"`
 	}
 
