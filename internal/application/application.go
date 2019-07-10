@@ -1,12 +1,12 @@
 package application
 
 import (
-	"database/sql"
 	"github.com/geofence/internal/configuration"
 	"github.com/geofence/internal/controller"
 	"github.com/geofence/internal/db"
 	r "github.com/geofence/internal/router"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"gopkg.in/go-playground/validator.v9"
 	"log"
@@ -16,7 +16,7 @@ import (
 
 type App struct {
 	Port string
-	DB *sql.DB
+	DB *sqlx.DB
 	Router *mux.Router
 }
 
@@ -28,7 +28,7 @@ func NewApplication(appConfig *configuration.Config) (*App, error) {
 		return nil, errors.Wrap(err, "error creating postgres client")
 	}
 
-	polyController := controller.NewPolyController(validator.New(), logger)
+	polyController := controller.NewPolyController(validator.New(), logger, db)
 	circleController := controller.NewCircleController(validator.New(), logger)
 	router := mux.NewRouter()
 	router = r.InitRoutes(router, polyController, circleController, appConfig, logger)

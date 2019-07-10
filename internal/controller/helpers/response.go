@@ -11,6 +11,10 @@ type ResponseWritingController struct {
 	Logger log.Logger
 }
 
+type InsertResponse struct {
+	Message string
+}
+
 func (c *ResponseWritingController) WriteResponse(w http.ResponseWriter, status int, payload []byte) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -56,3 +60,5 @@ func safeError(e error) *string {
 	s := e.Error()
 	return &s
 }
+
+

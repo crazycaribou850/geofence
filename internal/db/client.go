@@ -1,13 +1,13 @@
 package db
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"log"
 )
 
-func NewDB(dbURL string, logger log.Logger) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dbURL)
+func NewDB(dbURL string, logger log.Logger) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres", dbURL)
 	if err != nil {
 		logger.Println("Could not initialize DB with given config variables")
 		return nil, err

@@ -20,7 +20,7 @@ func Load() *Config {
 func loadPSQLConfig() string {
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://postgres:@localhost:5432/geofence?ssl=false"
+		dbURL = "postgres://postgres:@localhost:5432/geofence?sslmode=disable"
 	}
 	return dbURL
 }

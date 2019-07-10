@@ -14,6 +14,7 @@ func main() {
 	if wErr := errors.Wrapf(err, "failed setting up application"); wErr != nil {
 		log.Panic(wErr)
 	}
+	defer app.DB.Close()
 
 	app.Run()
 }
