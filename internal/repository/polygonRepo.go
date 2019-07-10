@@ -326,9 +326,9 @@ func (c *PolygonPostgresRepository) GetPolygonFromID(id int) (string, error) {
 	return result, nil
 }
 
-func (c *PolygonPostgresRepository) GetPolygonFromStoreID(store_id string) ([]PolyLocationResponseCleaned, error) {
-	querySQL := `SELECT * FROM store_polygons as sp, store_locations as sl  WHERE sl.store_id = :store_id`
-	SIDRow := SIDRow{StoreID: store_id}
+func (c *PolygonPostgresRepository) GetPolygonFromStoreID(storeID string) ([]PolyLocationResponseCleaned, error) {
+	querySQL := `SELECT * FROM store_polygons as sp, store_locations as sl WHERE sl.store_id = :store_id AND sl.id = sp.id`
+	SIDRow := SIDRow{StoreID: storeID}
 	records, err := c.DB.NamedQuery(querySQL, SIDRow)
 	if err != nil {
 		return []PolyLocationResponseCleaned{}, err
