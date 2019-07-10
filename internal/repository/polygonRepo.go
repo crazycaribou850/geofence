@@ -283,7 +283,7 @@ func (c *PolygonPostgresRepository) Insert(insertRequest PolyLocationRow) (error
 }
 
 func (c *PolygonPostgresRepository) GetAll() ([]PolyLocationResponseCleaned, error) {
-	querySQL := `SELECT * FROM store_polygons NATURAL JOIN store_locations_clone`
+	querySQL := `SELECT * FROM store_polygons NATURAL JOIN store_locations`
 
 	records, err := c.DB.Queryx(querySQL)
 	if err != nil {
@@ -327,7 +327,7 @@ func (c *PolygonPostgresRepository) GetPolygonFromID(id int) (string, error) {
 }
 
 func (c *PolygonPostgresRepository) GetPolygonFromStoreID(store_id string) ([]PolyLocationResponseCleaned, error) {
-	querySQL := `SELECT * FROM store_polygons as sp, store_locations_clone as sl  WHERE sl.store_id = :store_id`
+	querySQL := `SELECT * FROM store_polygons as sp, store_locations as sl  WHERE sl.store_id = :store_id`
 	SIDRow := SIDRow{StoreID: store_id}
 	records, err := c.DB.NamedQuery(querySQL, SIDRow)
 	if err != nil {
