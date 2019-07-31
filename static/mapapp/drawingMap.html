@@ -1,0 +1,264 @@
+<html>
+    <head>
+      <link rel="stylesheet" href="./leaflet/leaflet.css" />
+      <script src="./leaflet/leaflet.js"></script>
+      <script src="./Leaflet.draw/src/Leaflet.draw.js"></script>
+      <script src="./Leaflet.draw/src/Leaflet.Draw.Event.js"></script>
+      <link rel="stylesheet" href="./Leaflet.draw/src/leaflet.draw.css"/>
+
+      <script src="./Leaflet.draw/src/Toolbar.js"></script>
+      <script src="./Leaflet.draw/src/Tooltip.js"></script>
+
+      <script src="./Leaflet.draw/src/ext/GeometryUtil.js"></script>
+      <script src="./Leaflet.draw/src/ext/LatLngUtil.js"></script>
+      <script src="./Leaflet.draw/src/ext/LineUtil.Intersect.js"></script>
+      <script src="./Leaflet.draw/src/ext/Polygon.Intersect.js"></script>
+      <script src="./Leaflet.draw/src/ext/Polyline.Intersect.js"></script>
+      <script src="./Leaflet.draw/src/ext/TouchEvents.js"></script>
+
+      <script src="./Leaflet.draw/src/draw/DrawToolbar.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.Feature.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.SimpleShape.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.Polyline.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.Marker.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.Circle.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.CircleMarker.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.Polygon.js"></script>
+      <script src="./Leaflet.draw/src/draw/handler/Draw.Rectangle.js"></script>
+
+
+      <script src="./Leaflet.draw/src/edit/EditToolbar.js"></script>
+      <script src="./Leaflet.draw/src/edit/handler/EditToolbar.Edit.js"></script>
+      <script src="./Leaflet.draw/src/edit/handler/EditToolbar.Delete.js"></script>
+
+      <script src="./Leaflet.draw/src/Control.Draw.js"></script>
+
+      <script src="./Leaflet.draw/src/edit/handler/Edit.Poly.js"></script>
+      <script src="./Leaflet.draw/src/edit/handler/Edit.SimpleShape.js"></script>
+      <script src="./Leaflet.draw/src/edit/handler/Edit.Rectangle.js"></script>
+      <script src="./Leaflet.draw/src/edit/handler/Edit.Marker.js"></script>
+      <script src="./Leaflet.draw/src/edit/handler/Edit.CircleMarker.js"></script>
+      <script src="./Leaflet.draw/src/edit/handler/Edit.Circle.js"></script>
+    </head>
+
+    <body>
+      <div id="latlngg" style="font-size: 20px;"> Input Coordinates:
+        <input type="text" name="latlng" placeholder="<lat>, <long>" id="latlngform" style="border: 2px solid navy; border-radius: 4px;">
+        <input type="button" onclick="zoomTo()" value="Move" id="zoombtn" style="border: 2px solid navy; border-radius: 4px; color: white; font-weight: bold; background-color: teal;"/>
+      <div/>
+      <div id="filters" style="font-size: 18px;"> Find Stores:
+        <input type="number" name="store_id" placeholder="store_id" id="store_id_input" style="border: 2px solid navy; border-radius: 4px;">
+        <input type="text" name="metro_id" placeholder="metro_id" id="metro_id_input" style="border: 2px solid navy; border-radius: 4px;">
+        <input type="text" name="zone_id" placeholder="zone_id" id="zone_id_input" style="border: 2px solid navy; border-radius: 4px;">
+        <input type="text" name="city" placeholder="city" id="city_input" style="border: 2px solid navy; border-radius: 4px;">
+        <input type="text" name="state" placeholder="state" id="state_input" style="border: 2px solid navy; border-radius: 4px;">
+        <input type="button" onclick="find()" value="Find" id="filterbtn" style="border: 2px solid navy; border-radius: 4px; color: white; font-weight: bold; background-color: teal;"/>
+        <input type="text" name="id" placeholder="id" id="id_input" style="border: 2px solid navy; border-radius: 4px;">
+        <input type="button" onclick="findByID()" value="Find By ID" id="idfilterbtn" style="border: 2px solid navy; border-radius: 4px; color: white; font-weight: bold; background-color: teal;"/>
+        <input type="button" onclick="prev()" value="Previous" id="nextbtn" style="border: 2px solid navy; border-radius: 4px; color: white; font-weight: bold; background-color: maroon;"/>
+        <input type="button" onclick="next()" value="Next" id="prevbtn" style="border: 2px solid navy; border-radius: 4px; color: white; font-weight: bold; background-color: #1F772B;"/>
+      <div/>
+      <div id="map" style="width: 100%; height: 90%; border: 1px solid #ccc"></div>
+      <script>
+        var selectedGeom
+        var currentGeometry
+        var currentMarker
+        var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib }),
+                map = new L.Map('map', { center: new L.LatLng(37.1, -90.4), zoom: 5 }),
+                drawnItems = L.featureGroup().addTo(map);
+        L.control.layers({
+            'osm': osm.addTo(map),
+            "google": L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+                attribution: 'google'
+            })
+        }, { 'drawlayer': drawnItems }, { position: 'topleft', collapsed: false }).addTo(map);
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems,
+                poly: {
+                    allowIntersection: false
+                }
+            },
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true,
+                    shapeOptions: {
+                      color: 'purple'
+                    }
+                },
+                circle: {
+                  showArea: true,
+                  shapeOptions: {
+                    color: 'red'
+                  }
+                }
+            }
+        }));
+        var findLayer = L.geoJSON(false, { onEachFeature: bindPopupOnEachFeature}).addTo(map);
+
+        function zoomTo() {
+          var latlng = document.getElementById("latlngform").value;
+          splitted = latlng.split(',')
+          var lat = Number(splitted[0])
+          var lng = Number(splitted[1])
+          map.flyTo(new L.LatLng(lat, lng), 17);
+          if (currentMarker != undefined) {
+            map.removeLayer(currentMarker);
+          }
+          currentMarker = L.marker([lat,lng]).addTo(map);
+        }
+
+        function find() {
+          var store_id = document.getElementById("store_id_input").value;
+          var metro_id = document.getElementById("metro_id_input").value;
+          var zone_id = document.getElementById("zone_id_input").value;
+          var city = document.getElementById("city_input").value;
+          var state = document.getElementById("state_input").value;
+          var reqBody = JSON.stringify({"store_id": newParseInt(store_id), "metro_id": newParseInt(metro_id), "zone_id": newParseInt(zone_id), "city": city, "state": state})
+          xhr = new XMLHttpRequest();
+          var url = "http://localhost:8080/poly/find";
+          xhr.open("POST", url, true);
+          xhr.setRequestHeader("Content-type", "application/json");
+          xhr.onreadystatechange = function () {
+              if (xhr.readyState == 4 && xhr.status == 200) {
+                  var json = JSON.parse(xhr.responseText);
+                  findLayer.clearLayers()
+                  findLayer.addData(json)
+                  map.flyTo(new L.LatLng(37.1, -90.4), 5)
+              }
+          }
+          xhr.send(reqBody)
+        }
+
+        function findByID() {
+          var id = document.getElementById("id_input").value;
+          findByIDhelper(id)
+        }
+
+        function next() {
+          if (currentGeometry) {
+            console.log(currentGeometry)
+            var id = currentGeometry.properties.ID
+            findByIDhelper(id + 1)
+            map.flyTo(new L.LatLng(currentGeometry.properties.Latitude, currentGeometry.properties.Longitude), 16);
+          } else {
+            findByIDhelper(1)
+          }
+        }
+
+        function prev() {
+          if (currentGeometry && currentGeometry.properties.ID != 1) {
+            console.log(currentGeometry)
+            var id = currentGeometry.properties.ID
+            findByIDhelper(id - 1)
+            map.flyTo(new L.LatLng(currentGeometry.properties.Latitude, currentGeometry.properties.Longitude), 16);
+          } else {
+            findByIDhelper(1)
+          }
+        }
+
+        function findByIDhelper(id) {
+          xhr = new XMLHttpRequest();
+          var url = "http://localhost:8080/poly/find/" + id;
+          xhr.open("GET", url, true);
+          xhr.setRequestHeader("Content-type", "application/json");
+          xhr.onreadystatechange = function () {
+              if (xhr.readyState == 4 && xhr.status == 200) {
+                  var json = JSON.parse(xhr.responseText);
+                  findLayer.clearLayers()
+                  findLayer.addData(json)
+                  currentGeometry = json[0]
+                  map.flyTo(new L.LatLng(currentGeometry.properties.Latitude, currentGeometry.properties.Longitude), 16)
+                  renderPolygonIfAvailable(currentGeometry)
+              }
+          }
+          xhr.send()
+        }
+
+        function renderPolygonIfAvailable(currentGeometry) {
+          if (currentGeometry.properties.Polygon) {
+            findLayer.addData(asJSONfeature(JSON.parse(currentGeometry.properties.Polygon), currentGeometry.properties))
+          }
+        }
+
+        function asJSONfeature(geometry, properties) {
+          return {"type": "Feature", "properties": properties, "geometry": geometry}
+        }
+        function newParseInt(stringNumber) {
+          if (stringNumber == "") {
+            return 0
+          } else {
+            return parseInt(stringNumber, 10)
+          }
+        }
+
+        function bindPopupOnEachFeature(feature, layer) {
+          // does this feature have a property named popupContent?
+          if (feature.properties) {
+              layer.bindTooltip(popupFromProperties(feature.properties));
+              layer.on('click', function(e) {map.flyTo(new L.LatLng(feature.properties.Latitude, feature.properties.Longitude), 16);});
+              currentGeometry = feature
+          } else {
+            layer.bindTooltip("No properties available")
+          }
+        }
+
+        function popupFromProperties(properties) {
+          idDiv = "<div><b>" + properties.ID + "</b></div>"
+          nameDiv = "<div>" + properties.Name + "</div>"
+          addrDiv = "<div>" + properties.Street1 + ", " + properties.City + ", " + properties.State + " " + properties.Zip + "</div>"
+          return idDiv + nameDiv + addrDiv
+        }
+
+        function submitPolygon() {
+          var id = Number(document.getElementById('ide').value)
+          var geomObj = selectedGeom
+          var reqBody = JSON.stringify({"id": id, "polygon": geomObj})
+          console.log(reqBody)
+          xhr = new XMLHttpRequest();
+          var url = "https://polygons-mockup.herokuapp.com/insert/poly";
+          xhr.open("POST", url, true);
+          xhr.setRequestHeader("Content-type", "application/json");
+          xhr.onreadystatechange = function () {
+              if (xhr.readyState == 4 && xhr.status == 200) {
+                  var json = JSON.parse(xhr.responseText);
+              }
+          }
+          xhr.send(reqBody);
+          map.closePopup();
+          return false
+        }
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            var layer = event.layer;
+            var geoJSON = event.layer.toGeoJSON();
+            selectedGeom = geoJSON.geometry;
+            var tempMarker = drawnItems.addLayer(layer);
+            var ide = currentGeometry ? currentGeometry.properties.ID : "";
+            var name = currentGeometry ? currentGeometry.properties.Name : "";
+            var popupForm = `<form enctype="application/json">
+                              <fieldset>
+                                <legend>Store Polygon:</legend>
+                                ID:<br>
+                                <input type="number" name="id" value="` + ide + `" id="ide"><br>
+                                <div>` + name + `<div>
+                                <button type="button" onclick="submitPolygon(); return false;">Submit</button>
+                              </fieldset>
+                            </form>`
+            var popupContent = popupForm
+            layer.bindPopup(popupContent,{
+              keepInView: false,
+              closeButton: true
+              }).openPopup();
+            layer.on("click", function (e) {
+              selectedGeom = layer.toGeoJSON().geometry
+            })
+
+        });
+
+      </script>
+    </body>
+</html>

@@ -17,7 +17,7 @@ import (
 type App struct {
 	Port string
 	DB *sqlx.DB
-	Router *mux.Router
+	Router r.WithCORS
 }
 
 func NewApplication(appConfig *configuration.Config) (*App, error) {
@@ -30,7 +30,7 @@ func NewApplication(appConfig *configuration.Config) (*App, error) {
 
 	polyController := controller.NewPolyController(validator.New(), logger, db)
 	circleController := controller.NewCircleController(validator.New(), logger)
-	router := mux.NewRouter()
+	router := r.WithCORS{mux.NewRouter()}
 	router = r.InitRoutes(router, polyController, circleController, appConfig, logger)
 	return &App{
 		Port: appConfig.Port,

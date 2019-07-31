@@ -1,23 +1,23 @@
 package controller
 
 import (
-	"github.com/geofence/internal/controller/helpers"
+	helpers2 "github.com/geofence/internal/helpers"
 	"github.com/geofence/internal/logic"
-	"log"
 	"github.com/pquerna/ffjson/ffjson"
 	"gopkg.in/go-playground/validator.v9"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
 type CircleController struct {
-	*helpers.ResponseWritingController
+	*helpers2.ResponseWritingController
 	Validator *validator.Validate
 }
 
 func NewCircleController(validator *validator.Validate, log log.Logger) *CircleController {
 	return &CircleController{
-		ResponseWritingController: &helpers.ResponseWritingController{
+		ResponseWritingController: &helpers2.ResponseWritingController{
 			Logger: log,
 		},
 		Validator: validator,

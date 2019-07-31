@@ -11,9 +11,12 @@ func SetGeofencerV1Routes(router *mux.Router, polyController controller.PolyCont
 
 	polyRouter.Path("/").HandlerFunc(polyController.DetermineMembership()).Methods("POST")
 	polyRouter.Path("/all").HandlerFunc(polyController.Ping()).Methods("POST")
+	polyRouter.Path("/find/{id}").HandlerFunc(polyController.FindPolyLocationFromID()).Methods("GET")
+	polyRouter.Path("/find").HandlerFunc(polyController.FeatureQuery()).Methods("POST")
+	polyRouter.Path("/echo").HandlerFunc(polyController.Echo()).Methods("POST", "OPTIONS")
+	polyRouter.Path("/closest").HandlerFunc(polyController.FindMostProbableStore()).Methods("POST")
 	polyRouter.Path("/intersects").HandlerFunc(polyController.DetermineGeogMembership()).Methods("POST")
 	polyRouter.Path("/intersects/{id}").HandlerFunc(polyController.DetermineGeogMembershipFromID()).Methods("POST")
-	polyRouter.Path("/store_id/{store_id}").HandlerFunc(polyController.GetRowsFromStoreID()).Methods("POST")
 
 	insertRouter := router.PathPrefix("/insert").Subrouter()
 

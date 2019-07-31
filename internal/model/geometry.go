@@ -5,6 +5,8 @@ type Polygon struct {
 	Polygon PolyGeometry `json:"polygon" validate:"required"`
 }
 
+type Geometry interface {}
+
 type PolyGeometry struct {
 	Type string `json:"type" validate:"required"`
 	Coordinates [][][2]float64 `json:"coordinates" validate:"required"`

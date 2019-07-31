@@ -1,7 +1,6 @@
 package logic
 
 import (
-	geojson "github.com/paulmach/go.geojson"
 	"math"
 )
 
@@ -9,12 +8,6 @@ import (
 type RadialFence struct{
 	Center [2]float64	`json:"center"`
 	Radius float64	`json:"radius"`
-}
-
-// A polygon object
-func createPolygon(coordinates [][]float64) *geojson.Feature {
-	outer := [][][]float64{coordinates}
-	return geojson.NewPolygonFeature(outer)
 }
 
 // Helper function for radial distance

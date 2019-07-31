@@ -23,15 +23,6 @@ func (c *ResponseWritingController) WriteResponse(w http.ResponseWriter, status 
 	}
 }
 
-type ErrorPayload struct {
-	Error ErrorDetails `json:"error"`
-}
-
-type ErrorDetails struct {
-	Message *string `json:"message"`
-	Type    string  `json:"type"`
-}
-
 func (c *ResponseWritingController) WriteErrorResponse(w http.ResponseWriter, status int, message string, responseErr error) {
 
 	payload := ErrorPayload{
@@ -52,13 +43,5 @@ func (c *ResponseWritingController) WriteErrorResponse(w http.ResponseWriter, st
 	c.WriteResponse(w, status, b)
 }
 
-func safeError(e error) *string {
-	if e == nil {
-		return nil
-	}
-
-	s := e.Error()
-	return &s
-}
 
 
