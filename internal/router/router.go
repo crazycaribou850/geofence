@@ -37,5 +37,8 @@ func InitRoutes(router WithCORS,
 	log log.Logger,
 ) WithCORS {
 	SetGeofencerV1Routes(router.S, *polyController, *circleController)
+	router.S.
+		PathPrefix("/static/").
+		Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("."+"/static/"))))
 	return router
 }
