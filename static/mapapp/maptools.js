@@ -57,7 +57,7 @@ function find() {
     var state = document.getElementById("state_input").value;
     var reqBody = JSON.stringify({"store_id": newParseInt(store_id), "metro_id": newParseInt(metro_id), "zone_id": newParseInt(zone_id), "city": city, "state": state})
     xhr = new XMLHttpRequest();
-    var url = "http://localhost:8080/poly/find";
+    var url = "/poly/find";
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
@@ -100,7 +100,7 @@ function prev() {
 
 function findByIDhelper(id) {
     xhr = new XMLHttpRequest();
-    var url = "http://localhost:8080/poly/find/" + id;
+    var url = "/poly/find/" + id;
     xhr.open("GET", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {
@@ -157,7 +157,7 @@ function submitPolygon() {
     var reqBody = JSON.stringify({"id": id, "polygon": geomObj})
     console.log(reqBody)
     xhr = new XMLHttpRequest();
-    var url = "https://polygons-mockup.herokuapp.com/insert/poly";
+    var url = "/insert/poly";
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-type", "application/json");
     xhr.onreadystatechange = function () {

@@ -19,8 +19,6 @@ func SetGeofencerV1Routes(router *mux.Router, polyController controller.PolyCont
 	polyRouter.Path("/intersects/{id}").HandlerFunc(polyController.DetermineGeogMembershipFromID()).Methods("POST")
 
 	insertRouter := router.PathPrefix("/insert").Subrouter()
-
-	insertRouter.Path("/").HandlerFunc(polyController.InsertPolygonLocation()).Methods("POST")
 	insertRouter.Path("/poly").HandlerFunc(polyController.InsertPolygon()).Methods("POST")
 
 	circleRouter := router.PathPrefix("/circle").Subrouter()

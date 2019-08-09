@@ -147,46 +147,7 @@ func (c PolyController) InsertPolygon() func(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (c PolyController) InsertPolygonLocation() func(w http.ResponseWriter, r *http.Request) {
 
-	return func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
-		defer r.Body.Close()
-		if err != nil {
-			c.Logger.Println("Unprocessable request body", err)
-			c.WriteErrorResponse(w, http.StatusInternalServerError, "Could not read body", err)
-			return
-		}
-
-		var params repository.PolyLocationRow
-		err = json.Unmarshal(body, &params)
-		if err != nil {
-			c.Logger.Println("Failed to unmarshal IncomingPolyLocation", err)
-			c.WriteErrorResponse(w, http.StatusInternalServerError, "Could not unmarshal input", err)
-			return
-		}
-		err = c.Validator.Struct(params)
-		if err != nil {
-			c.Logger.Println("Unprocessable Request Body", err)
-			c.WriteErrorResponse(w, http.StatusUnprocessableEntity, "Invalid Request Body", err)
-			return
-		}
-		err = c.Repository.Insert(params)
-		if err != nil {
-			c.Logger.Println("Failed to insert into table")
-			c.WriteErrorResponse(w, http.StatusUnprocessableEntity, "Invalid Insert Request", err)
-			return
-		}
-		result := helpers.InsertResponse{"Insert Success!"}
-		responseBody, err := json.Marshal(result)
-		if err != nil {
-			c.Logger.Println("Response Marshal failed", err)
-			c.WriteErrorResponse(w, http.StatusInternalServerError, "Could not marshal response", err)
-			return
-		}
-		c.WriteResponse(w, http.StatusOK, responseBody)
-	}
-}
 
 func (c PolyController) Ping() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
